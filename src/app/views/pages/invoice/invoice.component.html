@@ -1,0 +1,71 @@
+<div class="invoice-modal">
+  <div class="modal-header">
+    <div class="logo-section">
+      <img src="" alt="Company Logo" class="company-logo" />
+    </div>
+    <h2>Invoice</h2>
+  </div>
+
+  <div class="modal-body">
+    <section class="client-info" aria-label="Client Information">
+      <h3>Client Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <label for="name">Name:</label>
+          <div id="name">{{ invoice?.payment?.client?.name || 'N/A' }}</div>
+        </div>
+        <div class="info-item">
+          <label for="RegNo">RegNo:</label>
+          <div id="RegNo">{{ invoice?.payment?.car?.regNo || 'N/A' }}</div>
+        </div>
+        <div class="info-item">
+          <label for="email">Email:</label>
+          <div id="email">{{ invoice?.payment?.client?.email || 'N/A' }}</div>
+        </div>
+        <div class="info-item">
+          <label for="phoneNumber">Phone:</label>
+          <div id="phoneNumber">{{ invoice?.payment?.client?.phoneNumber || 'N/A' }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="invoice-details" aria-label="Invoice Details">
+      <h3>Service Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ invoice?.payment?.service?.serviceType || 'N/A' }}</td>
+            <td>{{ invoice?.payment?.service?.price || '0.00' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="totals">
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span>{{ invoice?.payment?.givenPrice || '0.00' }}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total:</span>
+          <span>{{ invoice?.totalAmount || '0.00' }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-footer">
+    <button class="return-btn" (click)="back()" aria-label="Return">
+      Return
+    </button>
+
+    <button class="print-btn" (click)="printInvoice()" aria-label="Print Invoice">
+      <c-icon name="cil-print">Print Invoice</c-icon>
+    </button>
+  </div>
+</div>

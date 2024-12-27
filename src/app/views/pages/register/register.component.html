@@ -1,0 +1,55 @@
+<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col lg="7" md="9" xl="6">
+        <c-card class="mx-4">
+          <c-card-body class="p-4">
+            <form cForm>
+              <h1>Register</h1>
+              <p class="text-body-secondary">Create your account</p>
+
+              <!-- Username input group -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input id="name" [(ngModel)]="name" [ngModelOptions]="{standalone: true}" cFormControl placeholder="Username" required />
+              </c-input-group>
+
+              <!-- Email input group -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input id="email" [(ngModel)]="email" [ngModelOptions]="{standalone: true}" cFormControl placeholder="Email" required type="email"/>
+              </c-input-group>
+
+              <!-- Password input group -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input id="password" [(ngModel)]="password" [ngModelOptions]="{standalone: true}" cFormControl placeholder="Password" type="password" />
+              </c-input-group>
+
+              <!-- Role select input group -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg> <!-- Optionally you can change this icon -->
+                </span>
+                <select id="role" [(ngModel)]="roles" [ngModelOptions]="{standalone: true}"  required>
+                  <option value="ROLE_USER">ROLE_USER</option>
+                  <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+                </select>
+              </c-input-group>
+
+              <div class="d-grid">
+                <button cButton color="success" (click)="registerUser()">Create Account</button>
+              </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

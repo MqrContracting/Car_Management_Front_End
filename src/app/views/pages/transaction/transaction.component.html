@@ -1,0 +1,382 @@
+<div class="container mt-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-primary">Transactions</h4>
+    <button
+      class="btn btn-success"
+      data-bs-toggle="modal"
+      data-bs-target="#newTransactionModal"
+    >
+      New Transaction
+    </button>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="card mb-4">
+    <div class="card-header bg-light">
+      <span class="fw-bold">Filters</span>
+    </div>
+    <div class="card-body">
+      <form class="row g-3">
+        <!-- Application Type -->
+        <div class="col-md-3">
+          <label class="form-label" for="regNo">Reg No</label>
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter Reg No"
+              [(ngModel)]="filters.regNo"
+              (ngModelChange)="applyFilters()"
+              name="regNo"
+              autocomplete="on"
+            />
+          </div>
+        </div>
+
+        <!-- Submission Date From -->
+        <div class="col-md-3">
+          <label class="form-label">Date From</label>
+          <input
+            id="dateFrom"
+            type="date"
+            class="form-control"
+            [(ngModel)]="filters.dateFrom"
+              (ngModelChange)="applyFilters()"
+            name="dateFrom"
+          />
+        </div>
+
+        <!-- Submission Date To -->
+        <div class="col-md-3">
+          <label class="form-label">Date To</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filters.dateTo"
+              (ngModelChange)="applyFilters()"
+            name="dateTo"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <select class="form-select"
+          [(ngModel)]="filters.status"
+              (ngModelChange)="applyFilters()" name="status">
+            <option value="" disabled selected>-- Select Transaction Status --</option>
+            <option value="PENDING">PENDING</option>
+            <option value="COMPLETED">COMPLETED</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-md-4 d-flex gap-2 mt-3">
+          <button
+            type="button"
+            class="btn border border-success text-success w-50 bg-white"
+          >
+            Search
+          </button>
+          <button
+            type="reset"
+            class="btn border border-danger text-danger w-50 bg-white"
+          >
+            Clear All
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transaction Table -->
+  <div class="card">
+  <div class="card-header bg-light">
+    <span class="fw-bold">Transaction List</span>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-bordered mb-0">
+  <thead class="table-light">
+    <tr>
+      <th>Reg No</th>
+      <th>Type of Car</th>
+      <th>Client Name</th>
+      <th>Client Tel</th>
+      <th>Price</th>
+      <th>Payment Type</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Message s'il n'y a pas de transactions -->
+    <tr *ngIf="filteredPayments.length === 0">
+      <td colspan="9" class="text-center">No transactions found.</td>
+    </tr>
+    <!-- Affichage des transactions -->
+    <tr *ngFor="let payment of filteredPayments; trackBy: trackByPaymentId">
+      <td>{{ payment.car.regNo }}</td>
+      <td>{{ payment.car.carType }}</td>
+      <td>{{ payment.client.name }}</td>
+      <td>{{ payment.client.phoneNumber }}</td>
+      <td>{{ payment.service.price }}</td>
+      <td>{{ payment.paymentType }}</td>
+      <td>
+        <span [class]="payment.status === 'COMPLETED' ? 'text-success' : 'text-warning'">
+          {{ payment.status }}
+        </span>
+      </td>
+      <td>{{ convertToDateString(payment.paymentDate) }}</td>
+      <td class="d-flex flex-wrap gap-2 justify-content-center">
+        <!-- Bouton PAY & COLLECT -->
+        <button
+          id="payAndCollect"
+          *ngIf="payment.status === 'PENDING' && payment.isPaidNow === 'NO'"
+          class="btn btn-danger text-white btn-sm"
+          (click)="payAndCollect(payment)"
+        >
+          PAY & COLLECT
+        </button>
+
+        <!-- Bouton COLLECT -->
+        <button
+          id="collect"
+          *ngIf="payment.status === 'PENDING' && payment.isPaidNow === 'YES'"
+          class="btn btn-warning text-white btn-sm"
+          (click)="collect(payment)"
+        >
+          COLLECT
+        </button>
+
+        <!-- Bouton VIEW pour les paiements complétés -->
+        <button
+          id="viewInvoice"
+          *ngIf="payment.status === 'COMPLETED'"
+          class="btn btn-primary text-white btn-sm"
+          (click)="viewInvoice(payment)"
+        >
+          VIEW INV
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+  </div>
+</div>
+
+
+  <!-- New Transaction Modal -->
+  <div
+    class="modal fade"
+    id="newTransactionModal"
+    tabindex="-1"
+    aria-labelledby="newTransactionModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newTransactionModalLabel">New Transaction</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="paymentForm" >
+            <!-- Car Details -->
+            <fieldset class="mb-3">
+              <legend class="fs-6">Car & Client Details</legend>
+             <div formGroupName="client">
+                <div class="mb-3">
+                <label for="name" class="form-label">Client Name</label>
+                <input type="text" id="name" class="form-control" formControlName="name" />
+                  <div *ngIf="isFieldInvalid('name', 'client')" class="error">
+                  Client name is required.
+                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <input type="tel" id="phoneNumber" class="form-control" formControlName="phoneNumber" />
+                  <div *ngIf="isFieldInvalid('phoneNumber', 'client')" class="error">
+                  Phone number is required.
+                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Client Email</label>
+                <input type="email" id="email" class="form-control" formControlName="email" />
+                 <div *ngIf="isFieldInvalid('email', 'client')" class="error">
+                      Valid email is required.
+                 </div>
+              </div>
+             </div>
+              <div formGroupName="car">
+                <div class="mb-3" >
+                <label for="regNo" class="form-label">Reg No</label>
+                <input type="text" formControlName="regNo" id="regNo" class="form-control" />
+                  <div *ngIf="isFieldInvalid('regNo', 'car')" class="error">
+                      Valid regNo is required.
+                 </div>
+              </div>
+              <div class="mb-3" >
+                <label for="carType" class="form-label">Type of Car</label>
+                <select id="carType" class="form-select" formControlName="carType">
+                  <option value="" disabled selected>--Select Car Type--</option>
+                  <option value="Van">Van</option>
+                  <option value="PetiteVoiture">PetiteVoiture</option>
+                  <option value="FOUR_BY_FOUR">FOUR_BY_FOUR</option>
+                  <option value="MiniVan">MiniVan</option>
+                  <option value="MoyenneVoiture">MoyenneVoiture</option>
+                   <option value="Others">Others</option>
+                </select>
+                <div *ngIf="isFieldInvalid('carType', 'car')" class="error">
+                      Valid carType is required.
+                 </div>
+              </div>
+              </div>
+            </fieldset>
+
+            <!-- Service Details -->
+            <fieldset class="mb-3">
+              <legend class="fs-6">Service Details</legend>
+             <div formGroupName="service">
+                <div class="mb-3">
+                <label for="serviceType" class="form-label">Type of Service</label>
+                <select id="serviceType" class="form-select" formControlName="service_id" >
+                  <option value="" disabled selected>--Select Service--</option>
+                    <option *ngFor="let service of services; trackBy: trackByServiceId" [value]="service.id">{{ service.serviceType }}</option>
+
+                </select>
+                   <div *ngIf="isFieldInvalid('service_id', 'service')" class="error">
+                        Service is required.
+                   </div>
+              </div>
+             </div>
+              <div class="mb-3">
+                <label for="price" class="form-label">Actual Price</label>
+                <input type="number"
+                       id="price"
+                       class="form-control"
+                       formControlName="price"
+
+
+                />
+                <div *ngIf="isFieldInvalid('price')" class="error">
+                  Price must be greater than 0.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="givenPrice" class="form-label">Given Price</label>
+                <input type="number"
+                       id="givenPrice"
+                       class="form-control"
+                       formControlName="givenPrice"
+
+                       />
+                <div *ngIf="isFieldInvalid('givenPrice')" class="error">
+                  Given Price must be greater than 0.
+                </div>
+              </div>
+
+            </fieldset>
+
+            <!-- Payment Details -->
+            <fieldset class="mb-3">
+              <legend class="fs-6">Payment Details</legend>
+              <div class="mb-3" >
+  <!-- Type of Payment -->
+  <label for="paymentType" class="form-label">Type of Payment</label>
+  <select id="paymentType" class="form-select" formControlName="paymentType" >
+    <option value="" disabled selected>-- Select Payment Method --</option>
+    <option value="JUICE" >JUICE</option>
+    <option value="CASH">CASH</option>
+  </select>
+                <div *ngIf="isFieldInvalid('paymentType')" class="error">
+                Choose a method of payment.
+                </div>
+
+  <!-- Payment Timing -->
+
+<!--  <div class="form-check mt-3">-->
+<!--    <input-->
+<!--      type="checkbox"-->
+<!--      id="payNow"-->
+<!--      class="form-check-input"-->
+<!--      name="paymentTiming"-->
+<!--    />-->
+    <label for="isPaidNow" class="form-check-label">Pay Now</label>
+  <div class="mb-3">
+    <select id="isPaidNow" class="form-select" formControlName="isPaidNow" >
+    <option value="isPaidNow" disabled selected>-- PAY NOW? --</option>
+    <option value="YES" >YES</option>
+    <option value="NO">NO</option>
+  </select>
+    <div *ngIf="isFieldInvalid('isPaidNow')" class="error">
+                Choose a method of payment.
+                </div>
+  </div>
+
+  <!-- Conditional Field (Amount) -->
+<!--                @if (paymentForm.value.paymentType == "payNow"){-->
+<!--                    <div class="mt-3">-->
+<!--                      <label for="paymentAmount" class="form-label">Amount to Pay</label>-->
+<!--                      <input-->
+<!--                        type="number"-->
+<!--                        id="paymentAmount"-->
+<!--                        class="form-control"-->
+<!--                      />-->
+<!--                    </div>-->
+<!--                }-->
+
+
+  <!-- Time of Entry -->
+  <div class="mt-3" >
+    <label for="entryTime" class="form-label" >Time of Entry</label>
+    <input
+      type="time"
+      id="entryTime"
+      class="form-control"
+   formControlName="entryTime" />
+    <div *ngIf="isFieldInvalid('entryTime')" class="error">
+                Enter time of entry.
+                </div>
+    <div *ngIf="paymentForm.get('entryTime')?.errors?.['entryTimeInvalid']">
+    Entry time cannot be in the future.
+  </div>
+  </div>
+
+</div>
+            </fieldset>
+          </form>
+         <style>
+  .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+</style>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary"
+                  [disabled]="paymentForm.invalid || isSubmitting"
+                  (click)="submitPayment()">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Save Transaction</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
