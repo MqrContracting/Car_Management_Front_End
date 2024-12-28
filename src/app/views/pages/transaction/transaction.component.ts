@@ -13,7 +13,7 @@ import { PaymentService } from '../../../services/paiement.service';
 import { ServiceTypeService } from '../../../services/ServiceType.service';
 import { Payment } from '../../../Models/Payment';
 import { Service } from "../../../Models/Payment";
-import { Router, RouterLink } from "@angular/router";
+import { Router} from "@angular/router";
 import { NgForOf, NgIf } from "@angular/common";
 import Notiflix from "notiflix";
 
@@ -60,7 +60,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     service: this.formBuilder.group({
       service_id: ['', Validators.required],
     }),
-    givenPrice: [0, [Validators.required, Validators.min(1)]],
+    givenPrice: [0, [Validators.required, Validators.min(0)]],
     paymentType: ['', Validators.required],
     price: [0, [Validators.required, Validators.min(1)]],
     status: ['PENDING', Validators.required],

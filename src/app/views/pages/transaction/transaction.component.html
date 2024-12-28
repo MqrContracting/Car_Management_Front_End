@@ -121,7 +121,7 @@
       <td>{{ payment.car.carType }}</td>
       <td>{{ payment.client.name }}</td>
       <td>{{ payment.client.phoneNumber }}</td>
-      <td>{{ payment.service.price }}</td>
+      <td>{{ payment.givenPrice }}</td>
       <td>{{ payment.paymentType }}</td>
       <td>
         <span [class]="payment.status === 'COMPLETED' ? 'text-success' : 'text-warning'">
